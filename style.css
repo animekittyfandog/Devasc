@@ -1,0 +1,355 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.logo-title-container {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+}
+
+.header-logo {
+    height: 100px; 
+    width: auto;
+/*     margin-bottom: 20px; */
+}
+
+/* --- sidebar --- */
+.sidebar {
+    width: 300px;
+    background-color: #fff7ac; 
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-header {
+    margin-bottom: 20px;
+/*     text-align: center; */
+}
+
+.sidebar-header h1 {
+    font-size: 2.8em;
+    margin: 0;
+    font-weight: bold;
+    color: #333;
+}
+
+/* --- clock --- */
+#current-date-time {
+    background-color: #fffefa; 
+    border: 1px solid #e7d65a;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; 
+}
+
+#current-date-time #date {
+    font-size: 1.4em; 
+    font-weight: bold;
+    color: #a19448; 
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0; 
+}
+
+#current-date-time #time {
+    font-family: 'Lucida Console', 'Courier New', monospace; 
+    font-size: 2.2em; 
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 2px;
+    margin: 0; 
+    padding-left: 0; 
+}
+/* .sidebar-header p {
+    font-size: 0.8em;
+    margin-bottom: 10px;
+    color: #555;
+    text-transform: uppercase;
+} */
+
+.system-status {
+    margin-bottom: 60px;
+}
+
+.system-status h3 {
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* toggle switch css */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 40px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4CAF50;
+    transition: .4s;
+    border-radius: 40px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 32px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    transform: translateX(40px); 
+}
+
+input:not(:checked) + .slider {
+    background-color: #ccc;
+}
+
+input:not(:checked) + .slider:before {
+    transform: translateX(0px);
+}
+
+.sidebar-nav h2 {
+    font-size: 1.6em;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* --- Updated Sidebar Link Styles --- */
+.sidebar-nav a {
+    display: block;
+    text-decoration: none; 
+    color: black;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    font-weight: 500;
+    padding: 15px 15px 15px 35px;
+    margin-left: -15px; 
+    margin-right: -15px; 
+    border-radius: 8px;
+    transition: background-color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
+}
+/* --- Active Link Style --- */
+.sidebar-nav a.active {
+    background-color: #e7d65a; 
+    font-weight: 700;         
+    text-decoration: none;     
+}
+
+/* --- New Hover Effect for Sidebar Links --- */
+.sidebar-nav a:hover {
+    background-color: #e7d65a; 
+    text-decoration: none; 
+}
+
+.sidebar-nav + .sidebar-nav {
+    margin-top: 50px;
+}
+
+/* --- main content --- */
+.main-content {
+    flex-grow: 1; 
+    padding: 40px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.main-header h2 {
+    font-size: 2.8em;
+    margin: 0;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.notification-bell {
+    position: relative;
+    font-size: 2.2em;
+    color: #333;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6em;
+    font-weight: bold;
+}
+
+.camera-feeds {
+    display: flex;
+    gap: 40px;
+}
+
+.feed-container {
+    text-align: left;
+}
+
+.feed-placeholder {
+    width: 600px;
+    height: 500px;
+    background-color: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #777;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.feed-placeholder:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
+
+.feed-container p {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.notification-bell {
+    position: relative;
+    font-size: 2.2em;
+    color: #333;
+    cursor: pointer; 
+}
+
+/* --- sotification popup --- */
+.notification-popup {
+    display: none; 
+    position: absolute;
+    top: 100%;
+    right: -15px;
+    margin-top: 15px; /* space between bell and popup */
+    width: 280px;
+    background-color: white;
+    border: 1.5px solid black;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+
+.notification-popup.show {
+    display: block;
+}
+
+
+.notification-popup::before {
+    content: '';
+    position: absolute;
+    bottom: 100%; 
+    right: 25px; 
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent black transparent;
+}
+
+.popup-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.popup-content p {
+    margin: 5px 0;
+    font-size: 1em;
+    font-weight: 500;
+    color: #333;
+}
+
+.popup-content em {
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* --- violation history --- */
+
+/* --- violation history --- */
+.violation-content {
+    margin-top: 20px;
+    flex-grow: 1;
+}
+
+.violation-table {
+    width: 100%;
+    border-collapse: collapse; 
+    font-size: 1.1em;
+}
+
+/* Style for the data cells in the table body */
+.violation-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* Light line between rows */
+}
+
+/* NEW HEADER STYLING */
+.violation-table th {
+    padding: 16px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.2em;
+    border-bottom: 2px solid #000; /* Thick line under the header */
+}
+
+/* Adds the vertical lines between header cells */
+.violation-table th:not(:last-child) {
+    border-right: 2px solid #000;
+}
+
+/* Keeps the zebra-striping for the table rows */
+.violation-table tbody tr:nth-child(even) {
+    background-color: #f7f7f7; /* Using a subtle gray for zebra striping */
+}
