@@ -94,27 +94,17 @@
                 }
             });
             
-            // Real-time clock function
+            // Clock
             function updateDateTime() {
                 const now = new Date();
-                
-                // Format date
                 const options = { month: 'long', day: 'numeric', year: 'numeric' };
                 document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-                
-                // Format time
-                let hours = now.getHours();
-                let minutes = now.getMinutes();
-                let seconds = now.getSeconds();
+                let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
                 const ampm = hours >= 12 ? 'PM' : 'AM';
-                
-                hours = hours % 12;
-                hours = hours ? hours : 12; // Convert 0 to 12
-                minutes = minutes < 10 ? '0' + minutes : minutes;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-                
-                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}${ampm}`;
+                hours = hours % 12 || 12;
+                document.getElementById('time').textContent = `${hours}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}${ampm}`;
             }
+            updateDateTime(); setInterval(updateDateTime, 1000);
             
             // Initial call and set interval to update every second
             updateDateTime();

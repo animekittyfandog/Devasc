@@ -189,24 +189,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- Date and time ---
+    // Clock
     function updateDateTime() {
         const now = new Date();
         const options = { month: 'long', day: 'numeric', year: 'numeric' };
         document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        let seconds = now.getSeconds();
+        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12;
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-
-        document.getElementById('time').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+        document.getElementById('time').textContent = `${hours}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}${ampm}`;
     }
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+    updateDateTime(); setInterval(updateDateTime, 1000);
 
     // --- Handle "Resolve" button clicks ---
     document.querySelectorAll('.resolved-btn').forEach(button => {
