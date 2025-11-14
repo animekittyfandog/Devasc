@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 10, 2025 at 06:11 AM
+-- Generation Time: Nov 14, 2025 at 11:06 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,26 @@ CREATE TABLE `archive` (
   `vehicle_status` enum('registered','unregistered') NOT NULL,
   `archive_time` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `archive`
+--
+
+INSERT INTO `archive` (`id`, `original_violation_id`, `violation_time`, `license_plate`, `violation_description`, `vehicle_status`, `archive_time`) VALUES
+(31, 74, '2025-10-31 23:15:00', 'SJF-7601', 'Parked in Teacher', 'registered', '2025-11-14 08:38:16'),
+(51, 86, '2025-01-18 03:22:00', 'HQA-8653', 'Parked in Student', 'unregistered', '2025-11-14 09:25:45'),
+(58, 77, '2023-01-01 04:03:00', 'MNC-0146', 'Parked in Student', 'registered', '2025-11-14 09:25:54'),
+(59, 66, '2025-04-06 04:26:00', 'GJD-7316', 'Parked in Teacher', 'registered', '2025-11-14 09:25:55'),
+(60, 98, '2025-10-31 23:32:00', 'MPA-2846', 'Parked in Admin', 'registered', '2025-11-14 09:25:56'),
+(61, 72, '2025-12-13 06:28:00', 'RQV-2308', 'Parked in Teacher', 'registered', '2025-11-14 09:25:59'),
+(62, 97, '2025-12-24 04:03:00', 'UDB-3129', 'Blocking Gate', 'registered', '2025-11-14 09:26:00'),
+(63, 90, '2023-01-01 05:58:00', 'TSB-4210', 'Parked in Student', 'registered', '2025-11-14 09:42:33'),
+(69, 93, '2025-07-12 01:10:00', 'XUV-4703', 'No Parking Permit Displayed', 'registered', '2025-11-14 09:42:40'),
+(72, 67, '2025-11-28 04:47:00', 'FTX-3198', 'Parked in Reserved Slot', 'registered', '2025-11-14 09:42:44'),
+(74, 102, '2025-11-01 05:18:00', 'ZKM-5924', 'Parked in Admin', 'unregistered', '2025-11-14 09:42:50'),
+(75, 83, '2025-11-10 05:09:07', 'BJX-7219', 'Parked in Student', 'unregistered', '2025-11-14 09:42:52'),
+(76, 84, '2025-11-10 05:10:02', 'ABC-1234', 'Parked in Admin', 'unregistered', '2025-11-14 09:42:54'),
+(77, 103, '2025-12-14 00:27:00', 'BTD-3187', 'Parked in Student', 'unregistered', '2025-11-14 09:42:55');
 
 -- --------------------------------------------------------
 
@@ -128,39 +148,25 @@ CREATE TABLE `violations` (
 --
 
 INSERT INTO `violations` (`id`, `violation_time`, `license_plate`, `violation_description`, `vehicle_status`) VALUES
-(3, '2023-01-01 04:03:00', 'MNC-0146', 'Parked in Student', 'registered'),
-(7, '2023-01-01 01:25:00', 'BTD-3187', 'Parked in Student', 'unregistered'),
-(8, '2023-01-01 03:42:00', 'RXG-7405', 'Parked in Student', 'unregistered'),
-(9, '2023-01-01 05:16:00', 'JLP-2096', 'Parked in Admin', 'unregistered'),
-(12, '2023-01-01 02:08:00', 'HNG-9402', 'Parked in Admin', 'registered'),
-(13, '2023-01-01 05:58:00', 'TSB-4210', 'Parked in Student', 'registered'),
-(17, '2023-01-01 07:48:00', 'HQA-8653', 'Parked in Student', 'unregistered'),
-(20, '2023-01-01 07:53:00', 'PZD-8957', 'Parked in Student', 'registered'),
-(22, '2023-01-01 00:13:00', 'LBM-7154', 'Parked in Admin', 'registered'),
-(23, '2023-01-01 00:37:00', 'ZKM-5924', 'Parked in Admin', 'unregistered'),
-(50, '2025-11-10 05:09:07', 'KMG-4197', 'Parked in Admin', 'registered'),
-(51, '2025-11-10 05:09:07', 'BJX-7219', 'Parked in Student', 'unregistered'),
-(52, '2025-11-10 05:10:02', 'ABC-1234', 'Parked in Admin', 'unregistered'),
-(53, '2025-10-31 23:15:00', 'SJF-7601', 'Parked in Teacher', 'registered'),
-(54, '2025-10-31 23:32:00', 'MPA-2846', 'Parked in Admin', 'registered'),
-(55, '2025-11-01 00:05:00', 'ZTB-1294', 'Blocking Driveway', 'registered'),
-(56, '2025-11-01 00:27:00', 'BTD-3187', 'Parked in Student', 'unregistered'),
-(57, '2025-11-01 01:10:00', 'XUV-4703', 'No Parking Permit Displayed', 'registered'),
-(58, '2025-11-01 01:33:00', 'RXG-7405', 'Parked in Fire Lane', 'unregistered'),
-(59, '2025-11-01 01:50:00', 'JKH-3369', 'Parked in Teacher', 'registered'),
-(60, '2025-11-01 02:14:00', 'YBR-5802', 'Occupying Two Slots', 'registered'),
-(61, '2025-11-01 02:28:00', 'LBM-7154', 'Parked in Admin', 'registered'),
-(62, '2025-11-01 03:05:00', 'SRW-9825', 'Parked in Handicap Only', 'registered'),
-(63, '2025-11-01 03:22:00', 'HQA-8653', 'Parked in Student', 'unregistered'),
-(64, '2025-11-01 03:41:00', 'QWX-6405', 'Parked in No Parking Zone', 'registered'),
-(65, '2025-11-01 04:03:00', 'UDB-3129', 'Blocking Gate', 'registered'),
-(66, '2025-11-01 04:26:00', 'GJD-7316', 'Parked in Teacher', 'registered'),
-(67, '2025-11-01 04:47:00', 'FTX-3198', 'Parked in Reserved Slot', 'registered'),
-(68, '2025-11-01 05:02:00', 'HNG-9402', 'Parked in Admin', 'registered'),
-(69, '2025-11-01 05:18:00', 'ZKM-5924', 'Parked in Admin', 'unregistered'),
-(70, '2025-11-01 05:44:00', 'KRT-9205', 'Double Parking', 'registered'),
-(71, '2025-11-01 06:03:00', 'VSM-4032', 'No Sticker', 'registered'),
-(72, '2025-11-01 06:28:00', 'RQV-2308', 'Parked in Teacher', 'registered');
+(104, '2023-01-01 00:13:00', 'LBM-7154', 'Parked in Admin', 'registered'),
+(105, '2023-01-01 02:08:00', 'HNG-9402', 'Parked in Admin', 'registered'),
+(106, '2023-01-01 07:53:00', 'PZD-8957', 'Parked in Student', 'registered'),
+(107, '2025-02-13 06:03:00', 'VSM-4032', 'No Sticker', 'registered'),
+(108, '2025-03-26 03:05:00', 'SRW-9825', 'Parked in Handicap Only', 'registered'),
+(109, '2025-03-23 05:09:07', 'KMG-4197', 'Parked in Admin', 'registered'),
+(110, '2025-01-02 05:44:00', 'KRT-9205', 'Double Parking', 'registered'),
+(111, '2025-04-11 05:02:00', 'HNG-9402', 'Parked in Admin', 'registered'),
+(112, '2025-04-10 01:50:00', 'JKH-3369', 'Parked in Teacher', 'registered'),
+(113, '2025-05-12 00:05:00', 'ZTB-1294', 'Blocking Driveway', 'registered'),
+(114, '2025-09-17 02:14:00', 'YBR-5802', 'Occupying Two Slots', 'registered'),
+(115, '2025-10-08 03:41:00', 'QWX-6405', 'Parked in No Parking Zone', 'registered'),
+(116, '2025-10-10 02:28:00', 'LBM-7154', 'Parked in Admin', 'registered'),
+(117, '2025-02-12 03:42:00', 'RXG-7405', 'Parked in Student', 'unregistered'),
+(118, '2025-04-11 01:25:00', 'BTD-3187', 'Parked in Student', 'unregistered'),
+(119, '2025-10-04 07:48:00', 'HQA-8653', 'Parked in Student', 'unregistered'),
+(120, '2023-01-01 00:37:00', 'ZKM-5924', 'Parked in Admin', 'unregistered'),
+(121, '2025-10-18 05:16:00', 'JLP-2096', 'Parked in Admin', 'unregistered'),
+(122, '2025-11-01 01:33:00', 'RXG-7405', 'Parked in Fire Lane', 'unregistered');
 
 --
 -- Indexes for dumped tables
@@ -193,7 +199,7 @@ ALTER TABLE `violations`
 -- AUTO_INCREMENT for table `archive`
 --
 ALTER TABLE `archive`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `registered_vehicles`
@@ -205,7 +211,7 @@ ALTER TABLE `registered_vehicles`
 -- AUTO_INCREMENT for table `violations`
 --
 ALTER TABLE `violations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=123;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
