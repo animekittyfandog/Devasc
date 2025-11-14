@@ -19,7 +19,9 @@ $pdf->SetFillColor(51, 51, 51);
 $pdf->SetTextColor(255, 255, 255);
 $pdf->SetDrawColor(200, 200, 200);
 
-$w = array(40, 60, 80);
+// --- Column widths ---
+$w = array(50, 60, 70);
+
 $pdf->Cell($w[0], 8, 'Time', 1, 0, 'C', 1);
 $pdf->Cell($w[1], 8, 'License Plate', 1, 0, 'C', 1);
 $pdf->Cell($w[2], 8, 'Violation', 1, 1, 'C', 1);
@@ -33,7 +35,9 @@ $fill = 0;
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-        $time = date('g:i A', strtotime($row['violation_time']));
+        // --- Date format ---
+        $time = date('M d, Y g:i A', strtotime($row['violation_time']));
+
         $pdf->SetFillColor($fill ? 220 : 255, $fill ? 220 : 255, $fill ? 220 : 255);
         $pdf->Cell($w[0], 7, $time, 'LR', 0, 'L', 1);
         $pdf->Cell($w[1], 7, $row['license_plate'], 'LR', 0, 'L', 1);

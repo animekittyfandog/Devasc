@@ -22,7 +22,7 @@ $pdf->SetFillColor(51, 51, 51); // Dark grey background (#333)
 $pdf->SetTextColor(255, 255, 255); // White text
 $pdf->SetDrawColor(200, 200, 200); // Light grey border
 
-$w = array(40, 60, 80); // Widths for Time, License Plate, Violation
+$w = array(50, 60, 70); // Widths for Time, License Plate, Violation
 
 $pdf->Cell($w[0], 8, 'Time', 1, 0, 'C', 1);
 $pdf->Cell($w[1], 8, 'License Plate', 1, 0, 'C', 1);
@@ -37,10 +37,11 @@ $fill = 0; // Used to alternate row background color
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-        $time = date('g:i A', strtotime($row['violation_time']));
+        // Date format 
+        $time = date('M d, Y g:i A', strtotime($row['violation_time']));
 
         // Set alternating row background
-            $pdf->SetFillColor($fill ? 220 : 255, $fill ? 220 : 255, $fill ? 220 : 255);
+        $pdf->SetFillColor($fill ? 220 : 255, $fill ? 220 : 255, $fill ? 220 : 255);
 
         $pdf->Cell($w[0], 7, $time, 'LR', 0, 'L', 1);
         $pdf->Cell($w[1], 7, $row['license_plate'], 'LR', 0, 'L', 1);
@@ -54,8 +55,6 @@ if ($result->num_rows > 0) {
 // Draw the bottom border of the table
 $pdf->Cell(array_sum($w), 0, '', 'T');
 
-// 'I' will open it in a new tab (inline)
-// 'D' would force a download dialog
 $pdf->Output('Unregistered_Vehicles.pdf', 'I');
 
 $conn->close();

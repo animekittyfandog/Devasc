@@ -27,7 +27,7 @@ $pdf->SetFillColor(51, 51, 51); // Dark grey background
 $pdf->SetTextColor(255, 255, 255); // White text
 $pdf->SetDrawColor(200, 200, 200); // Light grey border
 
-$w = array(25, 40, 70, 45); 
+$w = array(40, 40, 55, 45); 
 
 // Print table header
 $pdf->Cell($w[0], 8, 'Time', 1, 0, 'C', 1);
@@ -35,7 +35,8 @@ $pdf->Cell($w[1], 8, 'License Plate', 1, 0, 'C', 1);
 $pdf->Cell($w[2], 8, 'Violation', 1, 0, 'C', 1);
 $pdf->Cell($w[3], 8, 'Archived', 1, 1, 'C', 1);
 
-$sql = "SELECT * FROM archive ORDER BY archive_time DESC";
+$sql = "SELECT * FROM archive ORDER BY violation_time ASC";
+
 $result = $conn->query($sql);
 
 // Set font for data rows
@@ -48,7 +49,7 @@ if ($result->num_rows > 0) {
 
         $pdf->SetFillColor($fill ? 220 : 255, $fill ? 220 : 255, $fill ? 220 : 255);
 
-        $violationTime = date('g:i A', strtotime($row['violation_time']));
+        $violationTime = date('M d, Y g:i A', strtotime($row['violation_time']));
         $archiveDateTime = date('M d, Y g:i A', strtotime($row['archive_time']));
 
         // Print the data cells

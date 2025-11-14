@@ -56,17 +56,16 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         .confirm-btn:hover { background-color: #218838; }
         .delete-btn { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 500; transition: background-color 0.2s ease; }
         .delete-btn:hover { background-color: #c82333; }
-        .confirmed-row { background-color: #d3d3d3 !important; opacity: 0.8; }
 
         .violation-table { width: 100%; border-collapse: collapse; table-layout: fixed; word-wrap: break-word; }
-        .violation-table th, .violation-table td { padding: 10px; text-align: left; }
-        .violation-table th:nth-child(1) { width: 15%; } .violation-table th:nth-child(2) { width: 25%; } .violation-table th:nth-child(3) { width: 35%; } .violation-table th:nth-child(4) { width: 25%; }
+        .violation-table th, .violation-table td { padding: 10px; text-align: left; vertical-align: middle; }
+        .violation-table th:nth-child(1) { width: 20%; } 
+        .violation-table th:nth-child(2) { width: 25%; } 
+        .violation-table th:nth-child(3) { width: 30%; } 
+        .violation-table th:nth-child(4) { width: 25%; }
         .violation-table th { background-color: #333; color: white; }
         .violation-table tr:nth-child(odd) { background-color: #ffffff; }
         .violation-table tr:nth-child(even) { background-color: #dcdcdc; }
-
-        .confirm-btn.checked { background-color: gray !important; cursor: not-allowed; }
-        .confirm-btn.checked::before { content: "✔ "; }
 
         .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
         .modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
@@ -84,6 +83,10 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         .pagination a:hover { background-color: #f5f5f5; }
         .pagination a.active { background-color: #333; color: white; border-color: #333; cursor: default; }
         .pagination span.disabled { color: #aaa; background-color: #f9f9f9; cursor: not-allowed; }
+
+        .violation-content { display: flex; flex-direction: column; min-height: 80vh; }
+        .table-section { flex-grow: 1; }
+        .pagination { flex-shrink: 0; padding-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -119,7 +122,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
                             if ($result->num_rows > 0) {
                                 while($row = $result->fetch_assoc()) {
                                     echo "<tr data-id='" . htmlspecialchars($row["id"]) . "'>";
-                                    echo "<td>" . date("g:i A", strtotime($row["violation_time"])) . "</td>";
+                                    echo "<td>" . date("M d, Y <br> g:i A", strtotime($row["violation_time"])) . "</td>";
                                     echo "<td>" . htmlspecialchars($row["license_plate"]) . "</td>";
                                     echo "<td>" . htmlspecialchars($row["violation_description"]) . "</td>";
                                     echo '<td><button class="confirm-btn">Confirm</button> <button class="delete-btn">Delete</button></td>';
@@ -131,13 +134,12 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
                         ?>
                     </tbody>
                 </table>
-                <?php 
-                    // DYNAMICALLY GENERATE PAGINATION LINKS
-                    if ($total_pages > 1) {
-                        generate_pagination_links($page, $total_pages, 'page');
-                    }
-                ?>
             </div>
+            <?php 
+                if ($total_pages > 1) {
+                    generate_pagination_links($page, $total_pages, 'page');
+                }
+            ?>
         </div>
     </main>
 </div>
@@ -155,7 +157,6 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // This JavaScript is unchanged and will work with the paginated content.
     const notificationContainer = document.getElementById('notification-container');
     const notificationPopup = document.getElementById('notification-popup');
     notificationContainer.addEventListener('click', e => { e.stopPropagation(); notificationPopup.classList.toggle('show'); });
@@ -199,24 +200,19 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmModal.style.display = 'block';
         });
     });
+
     confirmConfirmBtn.addEventListener('click', async function() {
         if (rowToConfirm) {
             const violationId = rowToConfirm.dataset.id;
             const success = await archiveViolation(violationId);
             if(success) {
-                // We don't remove the row, just style it as confirmed
-                const confirmButton = rowToConfirm.querySelector('.confirm-btn');
-                confirmButton.classList.add('checked');
-                confirmButton.textContent = 'Confirmed';
-                confirmButton.disabled = true;
-                rowToConfirm.classList.add('confirmed-row');
-                const deleteButton = rowToConfirm.querySelector('.delete-btn');
-                if (deleteButton) deleteButton.style.display = 'none';
+                window.location.reload();
             }
         }
         confirmModal.style.display = 'none';
         rowToConfirm = null;
     });
+
     cancelConfirmBtn.addEventListener('click', function() {
         confirmModal.style.display = 'none';
         rowToConfirm = null;
@@ -237,7 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const violationId = rowToDelete.dataset.id;
             const success = await archiveViolation(violationId);
             if (success) {
-                // Reload to show the change correctly across pages
                 window.location.reload();
             }
         }

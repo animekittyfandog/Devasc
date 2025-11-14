@@ -3,7 +3,7 @@ include 'db_connect.php';
 
 $records_per_page = 5;
 
-// --- 1. PAGINATION FOR REGISTERED VEHICLES ---
+// --- PAGINATION FOR REGISTERED VEHICLES ---
 $page_reg = isset($_GET['page_reg']) && is_numeric($_GET['page_reg']) ? (int)$_GET['page_reg'] : 1;
 $offset_reg = ($page_reg - 1) * $records_per_page;
 
@@ -12,7 +12,7 @@ $total_reg_result = $conn->query("SELECT COUNT(*) FROM archive WHERE vehicle_sta
 $total_reg_records = $total_reg_result->fetch_row()[0];
 $total_reg_pages = ceil($total_reg_records / $records_per_page);
 
-// --- 2. PAGINATION FOR UNREGISTERED VEHICLES ---
+// --- PAGINATION FOR UNREGISTERED VEHICLES ---
 $page_unreg = isset($_GET['page_unreg']) && is_numeric($_GET['page_unreg']) ? (int)$_GET['page_unreg'] : 1;
 $offset_unreg = ($page_unreg - 1) * $records_per_page;
 
@@ -61,7 +61,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkSense - Archives</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -70,8 +70,8 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     .violation-section h2 { text-decoration: underline; font-size: 1.8em; font-weight: bold; margin-bottom: 20px; }
     .violation-section { margin-bottom: 50px; }
     .violation-table { width: 100%; border-collapse: collapse; table-layout: fixed; word-wrap: break-word; }
-    .violation-table th, .violation-table td { padding: 10px; text-align: left; }
-    .violation-table th { background-color: #333; color: white; text-transform: uppercase; }
+    .violation-table th, .violation-table td { padding: 10px; text-align: left; vertical-align: middle; }
+    .violation-table th { background-color: #333; color: white; }
     .violation-table tr:nth-child(odd) { background-color: #ffffff; }
     .violation-table tr:nth-child(even) { background-color: #dcdcdc; }
     .violation-table tr:last-child td { border-bottom: none; }
@@ -94,6 +94,10 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     .modal-buttons button { border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 0 10px; }
     #confirm-restore-btn { background-color: #28a745; color: white; }
     #cancel-restore-btn { background-color: #ccc; color: #333; }
+
+    .violation-section { display: flex; flex-direction: column; min-height: 450px; }
+    .table-wrapper { flex-grow: 1; }
+    .pagination { flex-shrink: 0; padding-bottom: 20px;}
 </style>
 
 </head>
@@ -116,13 +120,12 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
 
         <div class="violation-section">
             <h2>Violation History</h2>
+            <div class="table-wrapper"> 
             <table class="violation-table">
-                <thead><tr><th style="width: 15%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 45%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
+                <thead><tr><th style="width: 20%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
                 <tbody>
                     <?php
-                        // ✅ CHANGE HERE: Sorting by violation_time to be consistent.
-                        $sql_registered = "SELECT * FROM archive WHERE vehicle_status = 'registered' ORDER BY violation_time DESC LIMIT ? OFFSET ?";
-                        $stmt_reg = $conn->prepare($sql_registered);
+                        $sql_registered = "SELECT * FROM archive WHERE vehicle_status = 'registered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";                        $stmt_reg = $conn->prepare($sql_registered);
                         $stmt_reg->bind_param("ii", $records_per_page, $offset_reg);
                         $stmt_reg->execute();
                         $result_registered = $stmt_reg->get_result();
@@ -130,7 +133,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
                         if ($result_registered->num_rows > 0) {
                             while($row = $result_registered->fetch_assoc()) {
                                 echo "<tr data-id='" . htmlspecialchars($row["id"]) . "'>";
-                                echo "<td>" . date("g:i A", strtotime($row["violation_time"])) . "</td>";
+                                echo "<td>" . date("M d, Y <br> g:i A", strtotime($row["violation_time"])) . "</td>";
                                 echo "<td>" . htmlspecialchars($row["license_plate"]) . "</td>";
                                 echo "<td>" . htmlspecialchars($row["violation_description"]) . "</td>";
                                 echo '<td><button class="restore-btn">Restore</button></td>';
@@ -142,6 +145,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
                     ?>
                 </tbody>
             </table>
+                        </div> 
             <?php 
                 if ($total_reg_pages > 1) {
                     generate_pagination_links($page_reg, $total_reg_pages, 'page_reg', "page_unreg=$page_unreg");
@@ -151,32 +155,34 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
 
         <div class="violation-section">
             <h2>Unregistered Vehicles</h2>
-            <table class="violation-table">
-                <thead><tr><th style="width: 15%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 45%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
-                <tbody>
-                    <?php
-                        // ✅ CHANGE HERE: Sorting by violation_time to be consistent.
-                        $sql_unregistered = "SELECT * FROM archive WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";
-                        $stmt_unreg = $conn->prepare($sql_unregistered);
-                        $stmt_unreg->bind_param("ii", $records_per_page, $offset_unreg);
-                        $stmt_unreg->execute();
-                        $result_unregistered = $stmt_unreg->get_result();
+            <div class="table-wrapper"> 
+                <table class="violation-table">
+                    <thead><tr><th style="width: 20%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
+                    <tbody>
+                        <?php
+                            $sql_unregistered = "SELECT * FROM archive WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";
+                            $stmt_unreg = $conn->prepare($sql_unregistered);
+                            $stmt_unreg->bind_param("ii", $records_per_page, $offset_unreg);
+                            $stmt_unreg->execute();
+                            $result_unregistered = $stmt_unreg->get_result();
 
-                        if ($result_unregistered->num_rows > 0) {
-                            while($row = $result_unregistered->fetch_assoc()) {
-                                echo "<tr data-id='" . htmlspecialchars($row["id"]) . "'>";
-                                echo "<td>" . date("g:i A", strtotime($row["violation_time"])) . "</td>";
-                                echo "<td>" . htmlspecialchars($row["license_plate"]) . "</td>";
-                                echo "<td>" . htmlspecialchars($row["violation_description"]) . "</td>";
-                                echo '<td><button class="restore-btn">Restore</button></td>';
-                                echo "</tr>";
+                            if ($result_unregistered->num_rows > 0) {
+                                while($row = $result_unregistered->fetch_assoc()) {
+                                    echo "<tr data-id='" . htmlspecialchars($row["id"]) . "'>";
+                                    echo "<td>" . date("M d, Y <br> g:i A", strtotime($row["violation_time"])) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["license_plate"]) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row["violation_description"]) . "</td>";
+                                    echo '<td><button class="restore-btn">Restore</button></td>';
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='4'>No archived unregistered violations found.</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='4'>No archived unregistered violations found.</td></tr>";
-                        }
-                    ?>
-                </tbody>
-            </table>
+                        ?>
+                    </tbody>
+                </table>
+            </div> 
+
              <?php 
                 if ($total_unreg_pages > 1) {
                     generate_pagination_links($page_unreg, $total_unreg_pages, 'page_unreg', "page_reg=$page_reg");
@@ -202,7 +208,6 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
 </div>
 
 <script>
-// The JavaScript remains unchanged.
 document.addEventListener('DOMContentLoaded', function() {
     function updateDateTime() {
         const now = new Date();

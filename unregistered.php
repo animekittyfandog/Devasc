@@ -57,8 +57,11 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         .resolved-btn { background-color: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 500; transition: background-color 0.2s ease; }
         .resolved-btn:hover { background-color: #218838; }
         .violation-table { width: 100%; border-collapse: collapse; table-layout: fixed; word-wrap: break-word; }
-        .violation-table th, .violation-table td { padding: 10px; text-align: left; }
-        .violation-table th:nth-child(1) { width: 15%; } .violation-table th:nth-child(2) { width: 25%; } .violation-table th:nth-child(3) { width: 35%; } .violation-table th:nth-child(4) { width: 25%; }
+        .violation-table th, .violation-table td { padding: 10px; text-align: left; vertical-align: middle; }
+        .violation-table th:nth-child(1) { width: 20%; } 
+        .violation-table th:nth-child(2) { width: 25%; } 
+        .violation-table th:nth-child(3) { width: 35%; } 
+        .violation-table th:nth-child(4) { width: 20%; }
         .violation-table th { background-color: #333; color: white; }
         .violation-table tr:nth-child(odd) { background-color: #ffffff; }
         .violation-table tr:nth-child(even) { background-color: #dcdcdc; }
@@ -73,12 +76,15 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         #confirm-resolve-btn { background-color: #28a745; color: white; }
         #cancel-resolve-btn { background-color: #ccc; color: #333; }
         
-        /* --- PAGINATION STYLES --- */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; }
         .pagination a, .pagination span.disabled { display: flex; align-items: center; gap: 5px; justify-content: center; text-decoration: none; color: #333; padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; }
         .pagination a:hover { background-color: #f5f5f5; }
         .pagination a.active { background-color: #333; color: white; border-color: #333; cursor: default; }
         .pagination span.disabled { color: #aaa; background-color: #f9f9f9; cursor: not-allowed; }
+
+        .violation-content { display: flex; flex-direction: column; min-height: 80vh; }
+        .table-section { flex-grow: 1; }
+        .pagination { flex-shrink: 0; padding-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -105,8 +111,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
                     <thead><tr><th>Time</th><th>License Plate</th><th>Violation</th><th>Actions</th></tr></thead>
                     <tbody>
                         <?php
-                        $sql = "SELECT * FROM violations WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";
-                        $stmt = $conn->prepare($sql);
+                        $sql = "SELECT * FROM violations WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";                        $stmt = $conn->prepare($sql);
                         $stmt->bind_param("ii", $records_per_page, $offset);
                         $stmt->execute();
                         $result = $stmt->get_result();
@@ -114,7 +119,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
                         if ($result->num_rows > 0) {
                             while($row = $result->fetch_assoc()) {
                                 echo "<tr data-id='" . htmlspecialchars($row['id']) . "'>";
-                                echo "<td>" . date('g:i A', strtotime($row['violation_time'])) . "</td>";
+                                echo "<td>" . date('M d, Y <br> g:i A', strtotime($row['violation_time'])) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['license_plate']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['violation_description']) . "</td>";
                                 echo "<td><button class='resolved-btn'>Resolve</button></td>";
@@ -126,13 +131,13 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
                         ?>
                     </tbody>
                 </table>
-                <?php 
-                    // DYNAMICALLY GENERATE PAGINATION LINKS
-                    if ($total_pages > 1) {
-                        generate_pagination_links($page, $total_pages, 'page');
-                    }
-                ?>
-            </div>
+            </div> 
+            
+            <?php 
+                if ($total_pages > 1) {
+                    generate_pagination_links($page, $total_pages, 'page');
+                }
+            ?>
         </div>
     </main>
 </div>
@@ -205,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const violationId = rowToResolve.dataset.id;
             const success = await archiveViolation(violationId);
             if (success) {
-                // Reload to show the change correctly across pages
                 window.location.reload(); 
             }
         }
