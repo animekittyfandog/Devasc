@@ -19,7 +19,7 @@ def run_alpr(image_path):
     try:
         # Load the custom model. Adjust 'path/to/yolov9/repo' if necessary 
         # based on how your environment is configured for the Ultralytics framework.
-        model = torch.hub.load('path/to/yolov9/repo', 'custom', path=YOLO_WEIGHTS_PATH, source='local') 
+        model = torch.hub.load('C:/xampp/htdocs/Devasc', 'custom', path=YOLO_WEIGHTS_PATH, source='local') 
         model.conf = 0.5    # Confidence threshold
         model.classes = [LICENSE_PLATE_CLASS_ID] 
     except Exception as e:
