@@ -67,11 +67,11 @@
 
             <div class="camera-feeds">
                 <div class="feed-container">
-                    <button class="feed-placeholder" type="button">Camera Feed 1</button>
+                    <button class="feed-placeholder" type="button">Camera Feed 1</button> <!-- Replace with actual video feed -->
                     <p>Available parking: 1</p>
                 </div>
                 <div class="feed-container">
-                    <button class="feed-placeholder" type="button">Camera Feed 2</button>
+                    <button class="feed-placeholder" type="button">Camera Feed 2</button> <!-- Replace with actual video feed -->
                     <p>Available parking: 1</p>
                 </div>
             </div>
