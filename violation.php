@@ -110,7 +110,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         <div class="violation-content">
             <div class="table-section" id="violationTableSection">
                 <table class="violation-table">
-                    <thead><tr><th>Time</th><th>License Plate</th><th>Violation</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Date & Time</th><th>License Plate</th><th>Violation</th><th>Actions</th></tr></thead>
                     <tbody>
                         <?php
                             $sql = "SELECT * FROM violations WHERE vehicle_status = 'registered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";

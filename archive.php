@@ -122,7 +122,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
             <h2>Violation History</h2>
             <div class="table-wrapper"> 
             <table class="violation-table">
-                <thead><tr><th style="width: 20%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
+                <thead><tr><th style="width: 20%;">Date & Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
                 <tbody>
                     <?php
                         $sql_registered = "SELECT * FROM archive WHERE vehicle_status = 'registered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";                        $stmt_reg = $conn->prepare($sql_registered);
@@ -157,7 +157,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
             <h2>Unregistered Vehicles</h2>
             <div class="table-wrapper"> 
                 <table class="violation-table">
-                    <thead><tr><th style="width: 20%;">Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
+                    <thead><tr><th style="width: 20%;">Date & Time</th><th style="width: 25%;">License Plate</th><th style="width: 40%;">Violation</th><th style="width: 15%;">Actions</th></tr></thead>
                     <tbody>
                         <?php
                             $sql_unregistered = "SELECT * FROM archive WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";
