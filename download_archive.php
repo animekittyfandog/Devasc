@@ -30,7 +30,7 @@ $pdf->SetDrawColor(200, 200, 200); // Light grey border
 $w = array(40, 40, 55, 45); 
 
 // Print table header
-$pdf->Cell($w[0], 8, 'Time', 1, 0, 'C', 1);
+$pdf->Cell($w[0], 8, 'Date & Time', 1, 0, 'C', 1);
 $pdf->Cell($w[1], 8, 'License Plate', 1, 0, 'C', 1);
 $pdf->Cell($w[2], 8, 'Violation', 1, 0, 'C', 1);
 $pdf->Cell($w[3], 8, 'Archived', 1, 1, 'C', 1);

@@ -22,7 +22,7 @@ $pdf->SetDrawColor(200, 200, 200);
 // --- Column widths ---
 $w = array(50, 60, 70);
 
-$pdf->Cell($w[0], 8, 'Time', 1, 0, 'C', 1);
+$pdf->Cell($w[0], 8, 'Date & Time', 1, 0, 'C', 1);
 $pdf->Cell($w[1], 8, 'License Plate', 1, 0, 'C', 1);
 $pdf->Cell($w[2], 8, 'Violation', 1, 1, 'C', 1);
 

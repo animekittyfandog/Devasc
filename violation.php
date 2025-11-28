@@ -61,8 +61,8 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
         .violation-table th, .violation-table td { padding: 10px; text-align: left; vertical-align: middle; }
         .violation-table th:nth-child(1) { width: 20%; } 
         .violation-table th:nth-child(2) { width: 25%; } 
-        .violation-table th:nth-child(3) { width: 30%; } 
-        .violation-table th:nth-child(4) { width: 25%; }
+        .violation-table th:nth-child(3) { width: 35%; } 
+        .violation-table th:nth-child(4) { width: 20%; }
         .violation-table th { background-color: #333; color: white; }
         .violation-table tr:nth-child(odd) { background-color: #ffffff; }
         .violation-table tr:nth-child(even) { background-color: #dcdcdc; }
