@@ -1,6 +1,11 @@
 <?php
 include 'db_connect.php';
 
+// --- AUTO-DELETE OLD RECORDS (30 DAYS POLICY) ---
+$cleanup_sql = "DELETE FROM archive WHERE archive_time < (NOW() - INTERVAL 30 DAY)";
+$conn->query($cleanup_sql);
+// ------------------------------------------------
+
 $records_per_page = 5;
 
 // --- PAGINATION FOR REGISTERED VEHICLES ---
@@ -201,6 +206,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     <i class="fas fa-file-download"></i> Download PDF
 </a>
 
+<!-- Restore Confirmation Modal -->
 <div id="restore-modal" class="modal-overlay">
     <div class="modal-content">
         <h3>Restore Violation</h3>
@@ -209,6 +215,17 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
             <button id="cancel-restore-btn">Cancel</button>
             <button id="confirm-restore-btn">Yes, Restore</button>
         </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="modal-overlay" style="cursor: pointer;">
+    <div class="modal-content">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <i class="fas fa-check-circle" style="color: #28a745; font-size: 3.5em;"></i>
+        </div>
+        <h3>Success!</h3>
+        <p>The record has been successfully restored.</p>
     </div>
 </div>
 
@@ -229,7 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
     notificationContainer.addEventListener('click', function(event) { event.stopPropagation(); notificationPopup.classList.toggle('show'); });
     window.addEventListener('click', function() { if (notificationPopup.classList.contains('show')) { notificationPopup.classList.remove('show'); } });
 
+    // --- Modal Elements ---
     const restoreModal = document.getElementById('restore-modal');
+    const confirmRestoreBtn = document.getElementById('confirm-restore-btn');
+    const successModal = document.getElementById('success-modal');
+    
     let rowToRestore = null;
 
     async function restoreViolation(archiveId) {
@@ -258,22 +279,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('confirm-restore-btn').addEventListener('click', async function() {
+    confirmRestoreBtn.addEventListener('click', async function() {
         if (rowToRestore) {
+            // Loading State
+            const originalText = confirmRestoreBtn.textContent;
+            confirmRestoreBtn.textContent = 'Processing...';
+            confirmRestoreBtn.disabled = true;
+
             const archiveId = rowToRestore.dataset.id;
             const success = await restoreViolation(archiveId);
+
+            confirmRestoreBtn.textContent = originalText;
+            confirmRestoreBtn.disabled = false;
+
             if (success) {
-                rowToRestore.remove();
-                window.location.reload();
+                restoreModal.style.display = 'none'; // Close confirm
+                successModal.style.display = 'block'; // Show success
+                rowToRestore.remove(); // Remove immediately for visuals
             }
         }
-        restoreModal.style.display = 'none';
-        rowToRestore = null;
     });
 
     document.getElementById('cancel-restore-btn').addEventListener('click', function() {
         restoreModal.style.display = 'none';
         rowToRestore = null;
+    });
+
+    // Close Success Modal on ANY click
+    successModal.addEventListener('click', function() {
+        successModal.style.display = 'none';
+        window.location.reload();
     });
 
     window.addEventListener('click', function(event) {

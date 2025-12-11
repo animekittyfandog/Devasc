@@ -10,7 +10,7 @@ require 'PHPMailer/src/SMTP.php';
 include 'db_connect.php';
 header('Content-Type: application/json');
 
-// --- AUTO-DELETE OLD RECORDS (30 DAYS POLICY) ---
+// --- AUTO-DELETE OLD RECORDS ---
 $cleanup_sql = "DELETE FROM archive WHERE archive_time < (NOW() - INTERVAL 30 DAY)";
 $conn->query($cleanup_sql);
 

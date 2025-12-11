@@ -6,22 +6,19 @@ $records_per_page = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $records_per_page;
 
-// Count total records for registered violations
+// Count total records
 $total_records_result = $conn->query("SELECT COUNT(*) FROM violations WHERE vehicle_status = 'registered'" );
 $total_records = $total_records_result->fetch_row()[0];
 $total_pages = ceil($total_records / $records_per_page);
 
-// Function to generate pagination links
 function generate_pagination_links($current_page, $total_pages, $page_param) {
     echo '<div class="pagination">';
-    
     if ($current_page > 1) {
         $prev_page = $current_page - 1;
         echo "<a href='?{$page_param}={$prev_page}'><i class='fas fa-chevron-left'></i> Prev</a>";
     } else {
         echo "<span class='disabled'><i class='fas fa-chevron-left'></i> Prev</span>";
     }
-
     for ($i = 1; $i <= $total_pages; $i++) {
         if ($i == $current_page) {
             echo "<a href='#' class='active'>{$i}</a>";
@@ -29,14 +26,12 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
             echo "<a href='?{$page_param}={$i}'>{$i}</a>";
         }
     }
-
     if ($current_page < $total_pages) {
         $next_page = $current_page + 1;
         echo "<a href='?{$page_param}={$next_page}'>Next <i class='fas fa-chevron-right'></i></a>";
     } else {
         echo "<span class='disabled'>Next <i class='fas fa-chevron-right'></i></span>";
     }
-
     echo '</div>';
 }
 ?>
@@ -148,11 +143,24 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
     <i class="fas fa-file-download"></i> Download PDF
 </a>
 
+<!-- Modals -->
 <div id="confirm-modal" class="modal-overlay">
     <div class="modal-content"><h3>Confirm Action</h3><p>Are you sure you want to confirm this violation? This will move it to the archive.</p><div class="modal-buttons"><button id="cancel-confirm-btn">Cancel</button><button id="confirm-confirm-btn">Yes, Confirm</button></div></div>
 </div>
+
 <div id="delete-modal" class="modal-overlay">
     <div class="modal-content"><h3>Confirm Deletion</h3><p>Are you sure you want to delete this violation record? This will also move it to the archive.</p><div class="modal-buttons"><button id="cancel-delete-btn">Cancel</button><button id="confirm-delete-btn">Yes, Delete</button></div></div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="modal-overlay" style="cursor: pointer;">
+    <div class="modal-content">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <i class="fas fa-check-circle" style="color: #28a745; font-size: 3.5em;"></i>
+        </div>
+        <h3>Success!</h3>
+        <p>The violation has been successfully processed.</p>
+    </div>
 </div>
 
 <script>
@@ -172,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     updateDateTime(); setInterval(updateDateTime, 1000);
 
+    // --- Action Logic ---
     async function archiveViolation(violationId) {
         const formData = new FormData();
         formData.append('violation_id', violationId);
@@ -190,10 +199,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Modal Elements
     const confirmModal = document.getElementById('confirm-modal');
     const confirmConfirmBtn = document.getElementById('confirm-confirm-btn');
     const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+    
+    const deleteModal = document.getElementById('delete-modal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+    const successModal = document.getElementById('success-modal');
+
     let rowToConfirm = null;
+    let rowToDelete = null;
+
+    // --- Confirm Logic ---
     document.querySelectorAll('.confirm-btn').forEach(button => {
         button.addEventListener('click', function() {
             rowToConfirm = this.closest('tr');
@@ -203,14 +223,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     confirmConfirmBtn.addEventListener('click', async function() {
         if (rowToConfirm) {
+            const originalText = confirmConfirmBtn.textContent;
+            confirmConfirmBtn.textContent = 'Processing...';
+            confirmConfirmBtn.disabled = true;
+
             const violationId = rowToConfirm.dataset.id;
             const success = await archiveViolation(violationId);
+
+            confirmConfirmBtn.textContent = originalText;
+            confirmConfirmBtn.disabled = false;
+
             if(success) {
-                window.location.reload();
+                confirmModal.style.display = 'none';
+                successModal.style.display = 'block'; // Show success modal
             }
         }
-        confirmModal.style.display = 'none';
-        rowToConfirm = null;
     });
 
     cancelConfirmBtn.addEventListener('click', function() {
@@ -218,37 +245,48 @@ document.addEventListener('DOMContentLoaded', function() {
         rowToConfirm = null;
     });
 
-    const deleteModal = document.getElementById('delete-modal');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    let rowToDelete = null;
+    // --- Delete Logic ---
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', function() {
             rowToDelete = this.closest('tr');
             deleteModal.style.display = 'block';
         });
     });
+    
     confirmDeleteBtn.addEventListener('click', async function() {
         if (rowToDelete) {
+            const originalText = confirmDeleteBtn.textContent;
+            confirmDeleteBtn.textContent = 'Processing...';
+            confirmDeleteBtn.disabled = true;
+
             const violationId = rowToDelete.dataset.id;
             const success = await archiveViolation(violationId);
+
+            confirmDeleteBtn.textContent = originalText;
+            confirmDeleteBtn.disabled = false;
+
             if (success) {
-                window.location.reload();
+                deleteModal.style.display = 'none';
+                successModal.style.display = 'block'; // Show success modal
             }
         }
-        deleteModal.style.display = 'none';
-        rowToDelete = null;
     });
+
     cancelDeleteBtn.addEventListener('click', function() {
         deleteModal.style.display = 'none';
         rowToDelete = null;
+    });
+
+    // --- Success Modal Logic: Click anywhere to close ---
+    successModal.addEventListener('click', function() {
+        successModal.style.display = 'none';
+        window.location.reload();
     });
 
     window.addEventListener('click', function(event) {
         if (event.target == deleteModal) deleteModal.style.display = 'none';
         if (event.target == confirmModal) confirmModal.style.display = 'none';
     });
-
 });
 </script>
 </body>

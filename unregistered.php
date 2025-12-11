@@ -6,22 +6,19 @@ $records_per_page = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $records_per_page;
 
-// Count total records for unregistered violations
+// Count total records
 $total_records_result = $conn->query("SELECT COUNT(*) FROM violations WHERE vehicle_status = 'unregistered'");
 $total_records = $total_records_result->fetch_row()[0];
 $total_pages = ceil($total_records / $records_per_page);
 
-// Function to generate pagination links
 function generate_pagination_links($current_page, $total_pages, $page_param) {
     echo '<div class="pagination">';
-    
     if ($current_page > 1) {
         $prev_page = $current_page - 1;
         echo "<a href='?{$page_param}={$prev_page}'><i class='fas fa-chevron-left'></i> Prev</a>";
     } else {
         echo "<span class='disabled'><i class='fas fa-chevron-left'></i> Prev</span>";
     }
-
     for ($i = 1; $i <= $total_pages; $i++) {
         if ($i == $current_page) {
             echo "<a href='#' class='active'>{$i}</a>";
@@ -29,14 +26,12 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
             echo "<a href='?{$page_param}={$i}'>{$i}</a>";
         }
     }
-
     if ($current_page < $total_pages) {
         $next_page = $current_page + 1;
         echo "<a href='?{$page_param}={$next_page}'>Next <i class='fas fa-chevron-right'></i></a>";
     } else {
         echo "<span class='disabled'>Next <i class='fas fa-chevron-right'></i></span>";
     }
-
     echo '</div>';
 }
 ?>
@@ -146,6 +141,7 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
     <i class="fas fa-file-download"></i> Download PDF
 </a>
 
+<!-- Resolve Confirmation Modal -->
 <div id="resolve-modal" class="modal-overlay">
     <div class="modal-content">
         <h3>Resolve Violation</h3>
@@ -154,6 +150,17 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
             <button id="cancel-resolve-btn">Cancel</button>
             <button id="confirm-resolve-btn">Yes, Resolve</button>
         </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="modal-overlay" style="cursor: pointer;">
+    <div class="modal-content">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <i class="fas fa-check-circle" style="color: #28a745; font-size: 3.5em;"></i>
+        </div>
+        <h3>Success!</h3>
+        <p>The violation has been successfully archived.</p>
     </div>
 </div>
 
@@ -175,6 +182,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     updateDateTime(); setInterval(updateDateTime, 1000);
 
+    // --- Elements ---
+    const resolveModal = document.getElementById('resolve-modal');
+    const confirmResolveBtn = document.getElementById('confirm-resolve-btn');
+    const cancelResolveBtn = document.getElementById('cancel-resolve-btn');
+    const successModal = document.getElementById('success-modal');
+    let rowToResolve = null;
+
+    // --- Action Functions ---
     async function archiveViolation(violationId) {
         const formData = new FormData();
         formData.append('violation_id', violationId);
@@ -193,11 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const resolveModal = document.getElementById('resolve-modal');
-    const confirmResolveBtn = document.getElementById('confirm-resolve-btn');
-    const cancelResolveBtn = document.getElementById('cancel-resolve-btn');
-    let rowToResolve = null;
-
+    // Open Modal
     document.querySelectorAll('.resolved-btn').forEach(button => {
         button.addEventListener('click', function() {
             rowToResolve = this.closest('tr');
@@ -205,23 +216,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Confirm Resolve
     confirmResolveBtn.addEventListener('click', async function() {
         if (rowToResolve) {
+            // Loading State
+            const originalText = confirmResolveBtn.textContent;
+            confirmResolveBtn.textContent = 'Processing...';
+            confirmResolveBtn.disabled = true;
+
             const violationId = rowToResolve.dataset.id;
             const success = await archiveViolation(violationId);
+
+            confirmResolveBtn.textContent = originalText;
+            confirmResolveBtn.disabled = false;
+
             if (success) {
-                window.location.reload(); 
+                resolveModal.style.display = 'none'; // Close resolve modal
+                successModal.style.display = 'block'; // Show success modal
             }
         }
-        resolveModal.style.display = 'none';
-        rowToResolve = null;
     });
 
+    // Close Resolve Modal
     cancelResolveBtn.addEventListener('click', function() {
         resolveModal.style.display = 'none';
         rowToResolve = null;
     });
     
+    // Close Success Modal on ANY click
+    successModal.addEventListener('click', function() {
+        successModal.style.display = 'none';
+        window.location.reload();
+    });
+
+    // Close Resolve Modal on outside click
     window.addEventListener('click', function(event) {
         if (event.target == resolveModal) {
             resolveModal.style.display = 'none';
