@@ -4,9 +4,9 @@ import pandas as pd
 from ultralytics import YOLO
 
 # 1. Setup
-model = YOLO('best.pt')
-reader = easyocr.Reader(['en'], gpu=True) # Uses your RTX 3060
-video_path = 'traffic_video.mp4'
+model = YOLO('weigths/best.pt') # File path in git of video
+reader = easyocr.Reader(['en'], gpu=True) # Force use of gpu for detection
+video_path = 'traffic_video.mp4' # Change to file path of actual video
 cap = cv2.VideoCapture(video_path)
 
 data_log = []
