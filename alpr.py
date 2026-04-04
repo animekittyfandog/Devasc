@@ -1,73 +1,60 @@
-import torch
 import cv2
 import easyocr
-import os
-import sys
-import json
+import pandas as pd
+from ultralytics import YOLO
 
-# --- Configuration ---
-# Path to your YOLO weights, relative to this script's location
-YOLO_WEIGHTS_PATH = 'weights/best.pt' 
-# The class ID for 'license-plate' in your dataset's .yaml file
-LICENSE_PLATE_CLASS_ID = 1 
-# ---
+# 1. Setup
+model = YOLO('best.pt')
+reader = easyocr.Reader(['en'], gpu=True) # Uses your RTX 3060
+video_path = 'traffic_video.mp4'
+cap = cv2.VideoCapture(video_path)
 
-def run_alpr(image_path):
-    """Runs YOLO detection and EasyOCR recognition."""
-    
-    # 1. Load YOLO Model
-    try:
-        # Load the custom model. Adjust 'path/to/yolov9/repo' if necessary 
-        # based on how your environment is configured for the Ultralytics framework.
-        model = torch.hub.load('C:/xampp/htdocs/Devasc', 'custom', path=YOLO_WEIGHTS_PATH, source='local') 
-        model.conf = 0.5    # Confidence threshold
-        model.classes = [LICENSE_PLATE_CLASS_ID] 
-    except Exception as e:
-        return {"error": f"Failed to load YOLO model: {e}"}
+data_log = []
+frame_count = 0
 
-    # 2. Load EasyOCR Reader 
-    # Uses GPU (RTX 3060) if available: torch.cuda.is_available()
-    reader = easyocr.Reader(['en'], gpu=torch.cuda.is_available())
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-    # 3. Load Image and Inference
-    img = cv2.imread(image_path)
-    if img is None:
-        return {"error": f"Failed to load image: {image_path}"}
-    
-    results = model(img)
-    detections = results.pandas().xyxy[0] 
-    license_plates = detections[detections['name'] == 'license-plate'] 
+    frame_count += 1
+    # Process every 5th frame to save on GPU usage
+    if frame_count % 5 != 0:
+        continue
 
-    final_results = []
+    results = model(frame, verbose=False)
 
-    for index, row in license_plates.iterrows():
-        # Get coordinates and crop the plate
-        x_min, y_min, x_max, y_max = int(row['xmin']), int(row['ymin']), int(row['xmax']), int(row['ymax'])
-        plate_crop = img[y_min:y_max, x_min:x_max]
-        
-        # Run OCR Recognition: allowlist restricts output to alphanumeric characters
-        ocr_results = reader.readtext(plate_crop, allowlist='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', detail=0) 
+    for result in results:
+        for box in result.boxes:
+            cls_id = int(box.cls[0])
+            class_name = model.names[cls_id]
 
-        if ocr_results:
-            plate_text = "".join(ocr_results).replace(" ", "") 
-            
-            final_results.append({
-                "plate_text": plate_text,
-                "confidence": float(row['confidence']),
-                "bbox": [x_min, y_min, x_max, y_max]
-            })
-            
-    return final_results
+            # Only target the "plates" class
+            if class_name.lower() == 'plates':
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                conf = float(box.conf[0])
 
-# Executes when the script is called from the command line (by the web server)
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        # Handle error if the image path is not provided
-        print(json.dumps({"error": "No image path provided."}))
-        sys.exit(1)
-        
-    image_to_process = sys.argv[1]
-    results = run_alpr(image_to_process)
-    
-    # Output the results as a JSON string
-    print(json.dumps(results))
+                # Crop and OCR
+                plate_crop = frame[y1:y2, x1:x2]
+                # detail=0 returns just the text string
+                ocr_result = reader.readtext(plate_crop, detail=0)
+                
+                plate_text = " ".join(ocr_result).strip()
+
+                if plate_text:
+                    data_log.append({
+                        "frame": frame_count,
+                        "confidence": round(conf, 2),
+                        "plate_text": plate_text
+                    })
+                    print(f"Frame {frame_count}: Detected Plate -> {plate_text}")
+
+cap.release()
+
+# 2. Export to CSV
+df = pd.DataFrame(data_log)
+# Clean up: Remove very short strings that might be noise (e.g., bolts/screws)
+df = df[df['plate_text'].str.len() > 3] 
+
+df.to_csv('video_plates_results.csv', index=False)
+print("Finished. Results saved to video_plates_results.csv")
