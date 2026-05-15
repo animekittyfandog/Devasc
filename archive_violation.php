@@ -37,8 +37,11 @@ try {
     $stmt_owner->bind_param("s", $violation['license_plate']);
     $stmt_owner->execute();
     $owner_result = $stmt_owner->get_result();
-    $owner = $owner_result->fetch_assoc(); 
+    $owner = $owner_result->num_rows > 0 ? $owner_result->fetch_assoc() : null;
     $stmt_owner->close();
+
+    // Only registered vehicles will have an owner email.
+    // Unregistered vehicles are skipped silently below.
 
     // 3. GET VIOLATION COUNT
     $stmt_count = $conn->prepare("SELECT COUNT(*) FROM archive WHERE license_plate = ?");
@@ -71,22 +74,22 @@ try {
         </div>";
     }
 
-    // 5. SEND EMAIL
-    if ($owner && !empty($owner['email'])) {
+    // 5. SEND EMAIL (only for registered vehicles with a known email)
+    if ($owner !== null && !empty($owner['email'])) {
         $mail = new PHPMailer(true);
         try {
             // --- SERVER SETTINGS ---
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';     
             $mail->SMTPAuth   = true;                 
-            $mail->Username   = 'parksenseai@gmail.com'; // UPDATE THIS
-            $mail->Password   = 'ebwg mbqy sksa wshq';    // UPDATE THIS
+            $mail->Username   = 'parksenseai@gmail.com'; // Gmail account used to SEND
+            $mail->Password   = 'ebwg mbqy sksa wshq';   // App password for above account
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
             // --- RECIPIENTS ---
-            $mail->setFrom('no-reply@parksense.ust.edu.ph', 'ParkSense Admin');
-            $mail->addAddress($owner['email']); 
+            $mail->setFrom('parksenseai@gmail.com', 'ParkSense Admin'); // Must match SMTP Username
+            $mail->addAddress($owner['email']); // <- Dynamically fetched from registered_vehicles
 
             $mail->isHTML(true);
             $mail->Subject = 'Official Notice of Parking Violation - ParkSense - Violation';
