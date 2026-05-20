@@ -48,14 +48,13 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content fade-in-content">
             <header class="main-header">
                 <h2>Student Parking</h2>
                 <div class="notification-bell" id="notification-container">
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge">1</span>
 
-                    <!-- notification popup -->
                     <div class="notification-popup" id="notification-popup">
                         <div class="popup-content">
                             <p>Violation detected by</p>

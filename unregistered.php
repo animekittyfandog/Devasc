@@ -4,12 +4,20 @@ include 'db_connect.php';
 // --- PAGINATION LOGIC ---
 $records_per_page = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $records_per_page;
 
 // Count total records
 $total_records_result = $conn->query("SELECT COUNT(*) FROM violations WHERE vehicle_status = 'unregistered'");
 $total_records = $total_records_result->fetch_row()[0];
-$total_pages = ceil($total_records / $records_per_page);
+$total_pages = max(1, ceil($total_records / $records_per_page));
+
+// Clamp page to valid range — prevents empty pages when records are deleted
+if ($page > $total_pages) {
+    header("Location: unregistered.php?page=" . $total_pages);
+    exit;
+}
+if ($page < 1) $page = 1;
+
+$offset = ($page - 1) * $records_per_page;
 
 function generate_pagination_links($current_page, $total_pages, $page_param) {
     echo '<div class="pagination">';
@@ -47,63 +55,68 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        .resolved-btn { background-color: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 500; transition: background-color 0.2s ease; }
-        .resolved-btn:hover { background-color: #218838; }
-        .violation-table { width: 100%; border-collapse: collapse; table-layout: fixed; word-wrap: break-word; }
-        .violation-table th, .violation-table td { padding: 10px; text-align: left; vertical-align: middle; }
-        .violation-table th:nth-child(1) { width: 20%; } 
-        .violation-table th:nth-child(2) { width: 25%; } 
-        .violation-table th:nth-child(3) { width: 35%; } 
-        .violation-table th:nth-child(4) { width: 20%; }
-        .violation-table th { background-color: #333; color: white; }
-        .violation-table tr:nth-child(odd) { background-color: #ffffff; }
-        .violation-table tr:nth-child(even) { background-color: #dcdcdc; }
-
-        .download-btn { display: inline-block; text-decoration: none; position: fixed; bottom: 20px; right: 30px; background-color: #007bff; color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0px 3px 6px rgba(0,0,0,0.2); transition: background-color 0.3s ease; }
-        .download-btn:hover { background-color: #0056b3; }
-
-        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
-        .modal-content h3 { margin-top: 0; }
-        .modal-buttons button { border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 0 10px; }
-        #confirm-resolve-btn { background-color: #28a745; color: white; }
-        #cancel-resolve-btn { background-color: #ccc; color: #333; }
-        
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; }
-        .pagination a, .pagination span.disabled { display: flex; align-items: center; gap: 5px; justify-content: center; text-decoration: none; color: #333; padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; }
-        .pagination a:hover { background-color: #f5f5f5; }
-        .pagination a.active { background-color: #333; color: white; border-color: #333; cursor: default; }
-        .pagination span.disabled { color: #aaa; background-color: #f9f9f9; cursor: not-allowed; }
-
-        .violation-content { display: flex; flex-direction: column; min-height: 80vh; }
-        .table-section { flex-grow: 1; }
-        .pagination { flex-shrink: 0; padding-bottom: 20px; }
-    </style>
 </head>
 <body>
 <div class="container">
     <aside class="sidebar">
         <div>
-            <div class="sidebar-header"><div class="logo-title-container"><img src="assets/ustlogo.png" alt="UST Logo" class="header-logo"><h1>ParkSense</h1></div></div>
-            <div id="current-date-time"><p id="date"></p><p id="time"></p></div>
-            <div class="system-status"><h2>System Activated</h2><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></div>
-            <nav class="sidebar-nav"><h2>Parking Areas:</h2><a href="admin.php">Admin</a><a href="student.php">Student</a></nav>
-            <nav class="sidebar-nav"><h2>Violations:</h2><a href="#" class="active">Unregistered Vehicles</a><a href="violation.php">Violation history</a><a href="archive.php">Archives</a></nav>
+            <div class="sidebar-header">
+                <div class="logo-title-container">
+                    <img src="assets/ustlogo.png" alt="UST Logo" class="header-logo">
+                    <h1>ParkSense</h1>
+                </div>
+            </div>
+            <div id="current-date-time">
+                <p id="date"></p>
+                <p id="time"></p>
+            </div>
+            <div class="system-status">
+                <h2>System Activated</h2>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <nav class="sidebar-nav">
+                <h2>Parking Areas:</h2>
+                <a href="admin.php">Admin</a>
+                <a href="student.php">Student</a>
+            </nav>
+            <nav class="sidebar-nav">
+                <h2>Violations:</h2>
+                <a href="#" class="active">Unregistered Vehicles</a>
+                <a href="violation.php">Violation history</a>
+                <a href="archive.php">Archives</a>
+            </nav>
         </div>
     </aside>
 
     <main class="main-content">
         <header class="main-header">
             <h2>Unregistered Vehicles</h2>
-            <div class="notification-bell" id="notification-container"><i class="fas fa-bell"></i><span class="notification-badge">1</span><div class="notification-popup" id="notification-popup"><div class="popup-content"><p>Violation detected by</p><p><em>*license plate number*</em></p></div></div></div>
+            <div class="notification-bell" id="notification-container">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">1</span>
+                <div class="notification-popup" id="notification-popup">
+                    <div class="popup-content">
+                        <p>Violation detected by</p>
+                        <p><em>*license plate number*</em></p>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <div class="violation-content">
+        <div class="violation-content fade-in-content">
             <div class="table-section" id="tableSection">
                 <table class="violation-table dark-header" id="violationTable">
-                    <thead><tr><th>Date & Time</th><th>License Plate</th><th>Violation</th><th>Actions</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>License Plate</th>
+                            <th>Violation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php
                         $sql = "SELECT * FROM violations WHERE vehicle_status = 'unregistered' ORDER BY violation_time ASC LIMIT ? OFFSET ?";                        $stmt = $conn->prepare($sql);
