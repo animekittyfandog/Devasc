@@ -43,10 +43,8 @@ body, html {
    3. Sidebar (Locked to 300px so it never squishes across tabs)
 --------------------------------------------------------------- */
 .sidebar {
-    width: 300px;
-    min-width: 300px; 
-    max-width: 300px;
-    background-color: #fff7ac; /* Original Brand Yellow */
+    width: 320px;
+    background-color: #fff7ac; 
     padding: 35px 24px;
     display: flex;
     flex-direction: column;
@@ -132,8 +130,9 @@ body, html {
 .system-status h2 {
     margin: 0;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #2d3748;
+    white-space: nowrap;
 }
 
 .toggle-switch {
@@ -261,14 +260,14 @@ input:checked + .slider:before {
 }
 
 /* ---------------------------------------------------------------
-   8. Notification Bell & Popup (With Smooth Animation)
+   8. Notification Bell & Popup
 --------------------------------------------------------------- */
 .notification-bell {
     position: relative;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #4a5568;
     cursor: pointer;
-    padding: 10px;
+    padding: 10px 12px;
     border-radius: 50%;
     background-color: #f7fafc;
     border: 1px solid #e2e8f0;
@@ -287,74 +286,137 @@ input:checked + .slider:before {
     position: absolute;
     top: 2px;
     right: 2px;
-    width: 20px;
-    height: 20px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
     background-color: #dc3545;
     color: white;
-    border-radius: 50%;
-    display: flex;
+    border-radius: 9px;
+    display: none;           /* Hidden by default; JS shows it only when count > 0 */
     justify-content: center;
     align-items: center;
-    font-size: 0.75rem;
-    font-weight: bold;
+    font-size: 0.7rem;
+    font-weight: 700;
     border: 2px solid #ffffff;
+    box-sizing: border-box;
+    line-height: 1;
 }
 
-/* Updated for smooth fade/slide animation */
+/* Popup container */
 .notification-popup {
     position: absolute;
-    top: calc(100% + 12px);
+    top: calc(100% + 10px);
     right: 0;
-    width: 290px;
+    width: 320px;
+    max-height: 380px;
+    overflow-y: auto;
     background-color: #ffffff;
-    border: 1px solid #cbd5e0;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
     z-index: 1000;
-    overflow: hidden;
-    
-    /* Animation Properties */
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: none;
 }
 
-/* Activated state trigger */
-.notification-popup.show {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+/* Scrollbar styling to match the clean aesthetic */
+.notification-popup::-webkit-scrollbar {
+    width: 4px;
+}
+.notification-popup::-webkit-scrollbar-track {
+    background: transparent;
+}
+.notification-popup::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 4px;
 }
 
-.popup-content {
-    padding: 16px;
-    text-align: left;
-    border-left: 4px solid #e7d65a;
-    background: #fffdf5;
+/* Clear All header bar */
+.notification-clear-header {
     display: flex;
-    flex-direction: column;
-    gap: 6px; /* Clean separation between the label and plate block */
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid #edf2f7;
+    background: #ffffff;
+    border-radius: 14px 14px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
-/* Explicit block alignment matching your layout graphic */
-.popup-content p {
+.notification-clear-header .notif-header-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #a0aec0;
     margin: 0;
-    font-size: 0.95em;
-    color: #4a5568;
+}
+
+.notification-clear-header #clear-all-notifications {
+    font-size: 0.78rem;
+    color: #e53e3e;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+.notification-clear-header #clear-all-notifications:hover {
+    background-color: #fff5f5;
+}
+
+/* Individual notification item */
+.popup-content {
+    padding: 14px 16px 14px 20px;
+    border-left: 3px solid #e7d65a;
+    background: #fffdf0;
+    border-bottom: 1px solid #f0ead0;
+    transition: background 0.15s ease;
+}
+
+.popup-content:hover {
+    background: #fffbe0;
+}
+
+.popup-content:last-child {
+    border-bottom: none;
+    border-radius: 0 0 14px 14px;
+}
+
+/* Action label — bold top line (e.g. "Violation Confirmed") */
+.popup-content .notif-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 5px 0;
     line-height: 1.4;
 }
 
-.popup-content em {
-    display: inline-block; /* Forces block-like behavior for layout isolation */
-    font-style: normal;
-    font-weight: 700;
-    color: #1a202c;
-    background: rgba(231, 214, 90, 0.25);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: 'Inter', monospace;
-    width: fit-content;
+/* Detail sentence — lighter, smaller */
+.popup-content .notif-detail {
+    font-size: 0.82rem;
+    color: #718096;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Empty state */
+.notification-empty {
+    padding: 24px 16px;
+    text-align: center;
+    border-radius: 14px;
+}
+
+.notification-empty p {
+    color: #a0aec0;
+    font-size: 0.85rem;
+    margin: 0;
+    font-weight: 500;
 }
 
 /* ---------------------------------------------------------------
@@ -532,61 +594,157 @@ input:checked + .slider:before {
 }
 
 /* ---------------------------------------------------------------
-   13. Modal Overlays
+   13. Modal Overlays (Premium, Polished, & Ironclad Workflow)
 --------------------------------------------------------------- */
 .modal-overlay {
     display: none;
     position: fixed;
     z-index: 2000;
-    left: 0; top: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(3px);
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%;
+    background-color: rgba(26, 32, 44, 0.3); /* Slightly darker tinted backing for crisp contrast */
+    backdrop-filter: blur(8px); /* Deeper luxurious glass blur effect */
+    transition: all 0.3s ease;
 }
 
 .modal-content {
     background-color: #ffffff;
-    margin: 12% auto;
-    padding: 32px;
+    margin: 10% auto;
+    padding: 40px 32px 32px 32px; /* Elegant, breathing padding allocation */
     width: 90%;
-    max-width: 400px;
-    border-radius: 12px;
+    max-width: 420px;
+    border-radius: 16px; /* Smooth, modern rounded corners */
     text-align: center;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 
+                0 10px 10px -5px rgba(0, 0, 0, 0.04),
+                0 0 0 1px rgba(0, 0, 0, 0.02); /* Multi-layered soft premium shadows */
+    border: 1px solid rgba(255, 255, 255, 0.8); /* Crisp inner border highlight */
+    transform: translateY(0);
+    animation: modalReveal 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; /* Fluid spring reveal entrance */
 }
 
 .modal-content h3 {
     margin-top: 0;
-    font-size: 1.3em;
-    color: #1a202c;
+    margin-bottom: 12px;
+    font-size: 1.5rem; /* Clean and authoritative sizing */
+    font-weight: 800; /* Extra bold hierarchy */
+    color: #1a202c; /* Rich off-black color */
+    letter-spacing: -0.5px;
 }
 
 .modal-content p {
     color: #4a5568;
-    font-size: 0.95em;
-    margin-bottom: 24px;
+    font-size: 0.98rem;
+    line-height: 1.6; /* Perfectly tracked leading for readability */
+    margin-bottom: 28px;
+    font-weight: 500;
 }
 
 .modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 14px; /* Perfectly separated modern layout tap targets */
 }
 
 .modal-buttons button {
     border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
+    padding: 12px 24px; /* Expanded, heavy-set elite padding format */
+    border-radius: 10px; /* Synchronized corner continuity */
     cursor: pointer;
     font-weight: 700;
-    font-size: 0.9em;
+    font-size: 0.92rem;
     flex: 1;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); /* Hyper-responsive animation curve */
 }
 
-/* Modal Explicit Actions Custom Overrides */
-#confirm-resolve-btn, #confirm-confirm-btn, #confirm-restore-btn { background-color: #1e7e34; color: white; }
-#confirm-delete-btn { background-color: #bd2130; color: white; }
-#cancel-resolve-btn, #cancel-confirm-btn, #cancel-delete-btn, #cancel-restore-btn { background-color: #edf2f7; color: #4a5568; }
+/* Modal Explicit Actions Custom Premium Overrides */
+#confirm-resolve-btn, 
+#confirm-confirm-btn, 
+#confirm-restore-btn { 
+    background-color: #1e7e34; 
+    color: white; 
+    box-shadow: 0 4px 12px rgba(30, 126, 52, 0.2);
+}
+#confirm-resolve-btn:hover, 
+#confirm-confirm-btn:hover, 
+#confirm-restore-btn:hover { 
+    background-color: #145c25; 
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(30, 126, 52, 0.3);
+}
+
+#confirm-delete-btn { 
+    background-color: #bd2130; 
+    color: white; 
+    box-shadow: 0 4px 12px rgba(189, 33, 48, 0.2);
+}
+#confirm-delete-btn:hover { 
+    background-color: #8c1622; 
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(189, 33, 48, 0.3);
+}
+
+#cancel-resolve-btn, 
+#cancel-confirm-btn, 
+#cancel-delete-btn, 
+#cancel-restore-btn { 
+    background-color: #f1f3f5; /* Premium soft neutral gray fallback tint */
+    color: #4a5568; 
+}
+#cancel-resolve-btn:hover, 
+#cancel-confirm-btn:hover, 
+#cancel-delete-btn:hover, 
+#cancel-restore-btn:hover { 
+    background-color: #e2e8f0; 
+    color: #1a202c;
+}
+
+/* Success Modal Dismiss Action Override */
+#success-dismiss-btn {
+    background-color: #1a202c; /* Matches dark premium brand palette core */
+    color: #ffffff;
+    max-width: 160px; /* Centered, compact appearance */
+    box-shadow: 0 4px 12px rgba(26, 32, 44, 0.15);
+}
+
+#success-dismiss-btn:hover {
+    background-color: #2d3748;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(26, 32, 44, 0.25);
+}
+
+/* Success Modal Custom Success Icon Pop */
+#success-modal .fa-check-circle {
+    animation: successScalePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Premium Keyframe Dynamics Animations */
+@keyframes modalReveal {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes successScalePop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
 
 /* ---------------------------------------------------------------
    14. Download Button (fixed, bottom-right)
@@ -650,6 +808,36 @@ input:checked + .slider:before {
     text-align: center;
 }
 
+/* Targets any main content container when the system is deactivated */
+.main-content.system-disabled {
+    position: relative;
+    pointer-events: none; /* Prevents all clicks, inputs, buttons, and camera feed actions */
+    opacity: 0.35;        /* Clean high-contrast grayed-out effect across all pages */
+    user-select: none;   /* Prevents text/data highlighting */
+    transition: opacity 0.3s ease;
+}
+
+/* Safety overlay barrier applied across the disabled workspace */
+.main-content.system-disabled::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    cursor: not-allowed;
+}
+
+/* Explicit rules targeting the Download PDF button when disabled */
+.download-btn.system-disabled {
+    pointer-events: none !important; /* Overrides existing pointer logic */
+    opacity: 0.35 !important;        /* Visual opacity matching the main area */
+    background-color: #6c757d !important; /* Forces a neutral disabled slate gray color */
+    box-shadow: none !important;     /* Removes interactive depth */
+    cursor: not-allowed !important;
+}
+
 /* ---------------------------------------------------------------
    17. Page Transitions
 --------------------------------------------------------------- */
@@ -657,10 +845,16 @@ input:checked + .slider:before {
     animation: fadeInPage 0.4s ease-out forwards;
 }
 
+/* When system is disabled, suppress the animation entirely so it
+   cannot override the opacity: 0.35 set by .system-disabled */
+.main-content.system-disabled.fade-in-content {
+    animation: none;
+}
+
 @keyframes fadeInPage {
     from {
-        opacity: 0;
-        transform: translateY(8px);
+        opacity: 0.7;             
+        transform: translateY(4px); 
     }
     to {
         opacity: 1;

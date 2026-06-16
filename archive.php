@@ -71,10 +71,10 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkSense - Archives</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -105,25 +105,26 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
             </nav>
             <nav class="sidebar-nav">
                 <h2>Violations:</h2>
-                <a href="unregistered.php">Unregistered Vehicles</a>
                 <a href="violation.php">Violation history</a>
-                <a href="archive.php" class="active">Archives</a>
+                <a href="unregistered.php">Unregistered Vehicles</a>
+                <a href="archive.php">Archives</a> 
             </nav>
         </div>
     </aside>
     <main id="archiveContent" class="main-content fade-in-content">
         <header class="main-header">
             <h2>Archives</h2>
+
             <div class="notification-bell" id="notification-container">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge">1</span>
+                <span class="notification-badge" id="nav-badge">0</span>
+
                 <div class="notification-popup" id="notification-popup">
-                    <div class="popup-content">
-                        <p>Violation detected by</p>
-                        <p><em>*license plate number*</em></p>
-                    </div>
+                    <div class="popup-list" id="popup-list">
+                        </div>
                 </div>
             </div>
+
         </header>
 
         <div class="violation-section">
@@ -208,10 +209,6 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
     </main>
 </div>
 
-<a href="download_archive.php" target="_blank" class="download-btn">
-    <i class="fas fa-file-download"></i> Download PDF
-</a>
-
 <!-- Restore Confirmation Modal -->
 <div id="restore-modal" class="modal-overlay">
     <div class="modal-content">
@@ -225,106 +222,20 @@ function generate_pagination_links($current_page, $total_pages, $page_param, $ot
 </div>
 
 <!-- Success Modal -->
-<div id="success-modal" class="modal-overlay" style="cursor: pointer;">
-    <div class="modal-content">
+<div id="success-modal" class="modal-overlay"> <div class="modal-content">
         <div style="text-align: center; margin-bottom: 15px;">
             <i class="fas fa-check-circle" style="color: #28a745; font-size: 3.5em;"></i>
         </div>
         <h3>Success!</h3>
-        <p>The record has been successfully restored.</p>
+        <p>The action has been completed successfully.</p>
+        <div class="modal-buttons" style="margin-top: 20px;">
+            <button id="success-dismiss-btn">Understood</button>
+        </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function updateDateTime() {
-        const now = new Date();
-        const options = { month: 'long', day: 'numeric', year: 'numeric' };
-        document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        document.getElementById('time').textContent = `${hours}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}${ampm}`;
-    }
-    updateDateTime(); setInterval(updateDateTime, 1000);
-    const notificationContainer = document.getElementById('notification-container');
-    const notificationPopup = document.getElementById('notification-popup');
-    notificationContainer.addEventListener('click', function(event) { event.stopPropagation(); notificationPopup.classList.toggle('show'); });
-    window.addEventListener('click', function() { if (notificationPopup.classList.contains('show')) { notificationPopup.classList.remove('show'); } });
+    <script src="parksense.js"></script>
 
-    // --- Modal Elements ---
-    const restoreModal = document.getElementById('restore-modal');
-    const confirmRestoreBtn = document.getElementById('confirm-restore-btn');
-    const successModal = document.getElementById('success-modal');
-    
-    let rowToRestore = null;
-
-    async function restoreViolation(archiveId) {
-        const formData = new FormData();
-        formData.append('archive_id', archiveId);
-        try {
-            const response = await fetch('restore_violation.php', { method: 'POST', body: formData });
-            const result = await response.json();
-            if (result.success) {
-                return true;
-            } else {
-                alert('Server Error: ' + result.message);
-                return false;
-            }
-        } catch (error) {
-            console.error('Network error:', error);
-            alert('A network error occurred. Could not restore violation.');
-            return false;
-        }
-    }
-
-    document.querySelector('.main-content').addEventListener('click', function(event) {
-        if (event.target.classList.contains('restore-btn')) {
-            rowToRestore = event.target.closest('tr');
-            restoreModal.style.display = 'block';
-        }
-    });
-
-    confirmRestoreBtn.addEventListener('click', async function() {
-        if (rowToRestore) {
-            // Loading State
-            const originalText = confirmRestoreBtn.textContent;
-            confirmRestoreBtn.textContent = 'Processing...';
-            confirmRestoreBtn.disabled = true;
-
-            const archiveId = rowToRestore.dataset.id;
-            const success = await restoreViolation(archiveId);
-
-            confirmRestoreBtn.textContent = originalText;
-            confirmRestoreBtn.disabled = false;
-
-            if (success) {
-                restoreModal.style.display = 'none'; // Close confirm
-                successModal.style.display = 'block'; // Show success
-                rowToRestore.remove(); // Remove immediately for visuals
-            }
-        }
-    });
-
-    document.getElementById('cancel-restore-btn').addEventListener('click', function() {
-        restoreModal.style.display = 'none';
-        rowToRestore = null;
-    });
-
-    // Close Success Modal on ANY click
-    successModal.addEventListener('click', function() {
-        successModal.style.display = 'none';
-        window.location.reload();
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target == restoreModal) {
-            restoreModal.style.display = 'none';
-            rowToRestore = null;
-        }
-    });
-});
-</script>
 </body>
 </html>
 <?php $conn->close(); ?>

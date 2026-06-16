@@ -49,11 +49,10 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkSense - Unregistered Vehicles</title>
-    <!-- Font and CSS -->
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -84,29 +83,30 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
             </nav>
             <nav class="sidebar-nav">
                 <h2>Violations:</h2>
-                <a href="#" class="active">Unregistered Vehicles</a>
                 <a href="violation.php">Violation history</a>
-                <a href="archive.php">Archives</a>
+                <a href="unregistered.php">Unregistered Vehicles</a>
+                <a href="archive.php">Archives</a> 
             </nav>
         </div>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content fade-in-content">
         <header class="main-header">
             <h2>Unregistered Vehicles</h2>
+
             <div class="notification-bell" id="notification-container">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge">1</span>
+                <span class="notification-badge" id="nav-badge">0</span>
+
                 <div class="notification-popup" id="notification-popup">
-                    <div class="popup-content">
-                        <p>Violation detected by</p>
-                        <p><em>*license plate number*</em></p>
-                    </div>
+                    <div class="popup-list" id="popup-list">
+                        </div>
                 </div>
             </div>
+
         </header>
 
-        <div class="violation-content fade-in-content">
+        <div class="violation-content">
             <div class="table-section" id="tableSection">
                 <table class="violation-table dark-header" id="violationTable">
                     <thead>
@@ -167,110 +167,20 @@ function generate_pagination_links($current_page, $total_pages, $page_param) {
 </div>
 
 <!-- Success Modal -->
-<div id="success-modal" class="modal-overlay" style="cursor: pointer;">
-    <div class="modal-content">
+<div id="success-modal" class="modal-overlay"> <div class="modal-content">
         <div style="text-align: center; margin-bottom: 15px;">
             <i class="fas fa-check-circle" style="color: #28a745; font-size: 3.5em;"></i>
         </div>
         <h3>Success!</h3>
-        <p>The violation has been successfully archived.</p>
+        <p>The action has been completed successfully.</p>
+        <div class="modal-buttons" style="margin-top: 20px;">
+            <button id="success-dismiss-btn">Understood</button>
+        </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const notificationContainer = document.getElementById('notification-container');
-    const notificationPopup = document.getElementById('notification-popup');
-    notificationContainer.addEventListener('click', function(event) { event.stopPropagation(); notificationPopup.classList.toggle('show'); });
-    window.addEventListener('click', function() { if (notificationPopup.classList.contains('show')) { notificationPopup.classList.remove('show'); } });
-    
-    function updateDateTime() {
-        const now = new Date();
-        const options = { month: 'long', day: 'numeric', year: 'numeric' };
-        document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-        let hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        document.getElementById('time').textContent = `${hours}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}${ampm}`;
-    }
-    updateDateTime(); setInterval(updateDateTime, 1000);
+    <script src="parksense.js"></script>
 
-    // --- Elements ---
-    const resolveModal = document.getElementById('resolve-modal');
-    const confirmResolveBtn = document.getElementById('confirm-resolve-btn');
-    const cancelResolveBtn = document.getElementById('cancel-resolve-btn');
-    const successModal = document.getElementById('success-modal');
-    let rowToResolve = null;
-
-    // --- Action Functions ---
-    async function archiveViolation(violationId) {
-        const formData = new FormData();
-        formData.append('violation_id', violationId);
-        try {
-            const response = await fetch('archive_violation.php', { method: 'POST', body: formData });
-            const result = await response.json();
-            if (!result.success) {
-                alert('Server Error: ' + result.message);
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.error('Network error:', error);
-            alert('A network error occurred. Could not resolve violation.');
-            return false;
-        }
-    }
-
-    // Open Modal
-    document.querySelectorAll('.resolved-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            rowToResolve = this.closest('tr');
-            resolveModal.style.display = 'block';
-        });
-    });
-
-    // Confirm Resolve
-    confirmResolveBtn.addEventListener('click', async function() {
-        if (rowToResolve) {
-            // Loading State
-            const originalText = confirmResolveBtn.textContent;
-            confirmResolveBtn.textContent = 'Processing...';
-            confirmResolveBtn.disabled = true;
-
-            const violationId = rowToResolve.dataset.id;
-            const success = await archiveViolation(violationId);
-
-            confirmResolveBtn.textContent = originalText;
-            confirmResolveBtn.disabled = false;
-
-            if (success) {
-                resolveModal.style.display = 'none'; // Close resolve modal
-                successModal.style.display = 'block'; // Show success modal
-            }
-        }
-    });
-
-    // Close Resolve Modal
-    cancelResolveBtn.addEventListener('click', function() {
-        resolveModal.style.display = 'none';
-        rowToResolve = null;
-    });
-    
-    // Close Success Modal on ANY click
-    successModal.addEventListener('click', function() {
-        successModal.style.display = 'none';
-        window.location.reload();
-    });
-
-    // Close Resolve Modal on outside click
-    window.addEventListener('click', function(event) {
-        if (event.target == resolveModal) {
-            resolveModal.style.display = 'none';
-            rowToResolve = null;
-        }
-    });
-});
-</script>
 </body>
 </html>
 <?php $conn->close(); ?>
